@@ -1,15 +1,18 @@
 package ru.msmai.a1.test.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
 import ru.msmai.a1.util.UtilStr;
 
-public class TestStrMsm {
+public class TestStr {
 
 	@Test
-	public void test01() {
+	public void test01getUps() {
 		assertEquals("A B C D E F G", UtilStr.getUps("a b C d e f g"));
 	}
 
@@ -24,7 +27,7 @@ public class TestStrMsm {
 	}
 
 	@Test
-	public void test02() {
+	public void test02delDbSpace() {
 		assertEquals("a b C d e f g", UtilStr.delDbSpace("a   b       C  d    e  f     g"));
 	}
 
@@ -39,7 +42,7 @@ public class TestStrMsm {
 	}
 
 	@Test
-	public void test03() {
+	public void test03justBreak() {
 		assertArrayEquals(new String[]{"a","b","C","d","e","f","g"},
 				UtilStr.justBreak("a;   b:       C,  d!    e  f     g"));
 	}
@@ -55,7 +58,7 @@ public class TestStrMsm {
 	}
 
 	@Test
-	public void test04() {
+	public void test04insInString() {
 		assertEquals("This is a sprint!", UtilStr.insInString("This is a string!", "string", "sprint"));
 	}
 
@@ -95,7 +98,7 @@ public class TestStrMsm {
 	}
 
 	@Test
-	public void test05() {
+	public void test05trueCompare() {
 		assertEquals("This is", UtilStr.trueCompare("This is a string!", "This is not fun"));
 	}
 
@@ -145,7 +148,7 @@ public class TestStrMsm {
 	}
 
 	@Test
-	public void test06() {
+	public void test06truePercent() {
 		assertEquals(4704, UtilStr.truePercent("This is a string!", "This is not fun!"));
 	}
 	
