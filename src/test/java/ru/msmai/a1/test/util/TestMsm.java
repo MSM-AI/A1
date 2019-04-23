@@ -67,20 +67,31 @@ public class TestMsm {
 		List<String> duplications = new ArrayList<String>();
 		Map<String,String> msmbycode = UtilMsm.selectAll(duplications);
 		assertNotNull(msmbycode);
-		assertEquals(65467, msmbycode.size());
-		assertEquals(6, duplications.size());
-		assertArrayEquals(new Object[]{"ABABACCABA", "AAAAAAABACAEA", "AAAAAAABACAHA", "AAAAAAABACAGA", "AAAAAAABACABA", "AAAAAAABACAAA"}
+		assertEquals(65468, msmbycode.size());
+		assertEquals(5, duplications.size());
+		assertArrayEquals(new Object[]{"AAAAAAABACAEA", "AAAAAAABACAHA", "AAAAAAABACAGA", "AAAAAAABACABA", "AAAAAAABACAAA"}
 			, duplications.toArray());
 		
 		//UtilMsm.reindexDuplications("ALIK2.tmp");
 		for(String code: duplications){
 			List<String[]> children = UtilMsm.selectChildren(code);
-			System.out.println("\nДубль мсм кода "+code+" у слов "+UtilMsm.selectAllWords(code)+" родитель ["+UtilMsm.getParents(code).stream().map(r->{return ((String[])r)[0]+": "+((String[])r)[1];}).collect(Collectors.joining(","))+"]");
+			System.out.println("\nДубль мсм кода "+code+" у слов "+UtilMsm.selectAllWords(code)+" родитель ["+UtilMsm.getParents(code).stream().map(
+					r->((String[])r)[0]+": "+((String[])r)[1]+" родитель "+Arrays.toString(UtilMsm.getParent(((String[])r)[0])))
+			.collect(Collectors.joining(", "))+"]");
 			System.out.println("--------------- потомки ---------------");
 			children.stream().forEach((record)->{
-				System.out.printf("%s - %s\n", record[0], record[1]);
+				System.out.printf("%s: %s\n", record[0], record[1]);
 			});
 		}
+		
+		System.out.println("\n");
+		  UtilMsm.getAllByCode("AAAAAAABACA").stream().forEach(r->{
+				 System.out.printf("%s: %s\n", ((String[])r)[0], ((String[])r)[1]);
+			 });
+			System.out.println("--------------- потомки ---------------");
+		 UtilMsm.selectChildren("AAAAAAABACA").stream().forEach(r->{
+			 System.out.printf("%s: %s\n", ((String[])r)[0], ((String[])r)[1]);
+		 });
 	}
 
 
