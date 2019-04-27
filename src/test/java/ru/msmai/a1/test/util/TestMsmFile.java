@@ -1,106 +1,169 @@
 package ru.msmai.a1.test.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static ru.msmai.a1.util.UtilMsmCode.getAvailableCodes;
+import static ru.msmai.a1.util.UtilMsmCode.getParentCode;
+import static ru.msmai.a1.util.UtilMsmCode.removeParent;
+import static ru.msmai.a1.util.UtilMsmFile.getChildren;
+import static ru.msmai.a1.util.UtilMsmFile.getDescendants;
+import static ru.msmai.a1.util.UtilMsmFile.getElement;
+import static ru.msmai.a1.util.UtilMsmFile.getNeighbors;
+import static ru.msmai.a1.util.UtilMsmFile.getNextAvailable;
+import static ru.msmai.a1.util.UtilMsmFile.getParent;
+import static ru.msmai.a1.util.UtilMsmFile.getRoot;
+import static ru.msmai.a1.util.UtilMsmFile.getUsedCodes;
+import static ru.msmai.a1.util.UtilMsmFile.iterate;
+import static ru.msmai.a1.util.UtilMsmFile.reindex;
+import static ru.msmai.a1.util.UtilMsmFile.selectAll;
+import static ru.msmai.a1.util.UtilMsmFile.selectWords;
+import static ru.msmai.a1.util.UtilPrint.atoString;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
-import java.util.stream.Collector.Characteristics;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
 
 import ru.msmai.a1.exceptions.MsmException;
-import ru.msmai.a1.util.UtilMsm;
+import ru.msmai.a1.util.UtilMsmCode;
 import ru.msmai.a1.util.UtilStr;
 
-public class TestMsm {
+public class TestMsmFile {
+
 	@Test
-	public void testAIterator() {
-		for (Iterator<String> iter = UtilMsm.iterate(); iter.hasNext();) {
+	public void testAIterator01() {
+		for (Iterator<String> iter = iterate(); iter.hasNext();) {
 			UtilStr.justSplit(iter.next());
 		}
 	}
 
 	@Test
-	public void testAllDescendants() {
-		List<String[]> children = UtilMsm.selectDescendants("AAAAAABABAAAA");
-		assertEquals(223, children.size());
+	public void testGetRoot01() {
+		String[] item = getRoot();
+		assertEquals(true, UtilMsmCode.isRoot(item[0]));
 	}
 
 	@Test
-	public void testAllChildren() {
-		List<String[]> children = UtilMsm.selectChildren("AAAAAABABAAAA");
+	public void testGetDescendants01() {
+		List<String[]> children = getDescendants("AAAAAABABAAAA");
+		assertEquals(222, children.size());
+	}
+
+	@Test
+	public void testGetChildren01() {
+		List<String[]> children = getChildren("AAAAAABABAAAA");
 		assertEquals(7, children.size());
 	}
 
 	@Test
-	public void testGetFirstByCode() {
-		String[] item = UtilMsm.getFirstByCode("AAAAAABABAAAA");
+	public void testGetElement01() {
+		String[] item = getElement("AAAAAABABAAAA");
 		assertNotNull(item);
 	}
 	@Test
-	public void testGetParent() {
-		String[] item = UtilMsm.getParent("AAAAAABABAAAA");
-		assertNotNull(item);
-	}
-
-	@Test
-	public void testGetRoot() {
-		String[] item = UtilMsm.getRoot();
+	public void testGetParent01() {
+		String[] item = getParent("AAAAAABABAAAA");
 		assertNotNull(item);
 	}
 
 	@Test
-	public void testSelectAll() throws MsmException {
+	public void testSelectWords01() {
+		List<String> words = selectWords("AAAAAAABACAEA");
+		assertNotNull(words);
+		assertEquals(2, words.size());
+		assertArrayEquals(new Object[]{"ЗЕЛЕНЫЙ", "ЗЕЛЕНОГО"}, words.toArray());
+	}
+
+	@Test
+	public void testGetNextAvailable01() {
+		assertEquals("L", getNextAvailable("AAAAAABABAAAABE"));
+	}
+
+	@Test
+	public void testGetNextAvailable02() {
+		assertEquals("A", getNextAvailable("AAAAAABABAAAABF"));
+	}
+
+	@Test
+	public void testGetUsed01() {
+		assertEquals("ABCDEFGHIJK", getUsedCodes("AAAAAABABAAAABE"));
+	}
+
+	@Test
+	public void testGetUsed02() {
+		assertEquals("ABCDEFGHIJK", getUsedCodes("AAAAAABABAAAABE"));
+	}
+
+	@Test
+	public void testGetAvailableCodes01() {
+		assertEquals("LMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", getAvailableCodes(getUsedCodes("AAAAAABABAAAABE")));
+	}
+
+	@Test
+	public void testSelectAll01() throws MsmException {
 		List<String> duplications = new ArrayList<String>();
-		Map<String,String> msmbycode = UtilMsm.selectAll(duplications);
+		Map<String,String> msmbycode = selectAll(duplications);
 		assertNotNull(msmbycode);
-		assertEquals(65468, msmbycode.size());
-		assertEquals(5, duplications.size());
-		assertArrayEquals(new Object[]{"AAAAAAABACAEA", "AAAAAAABACAHA", "AAAAAAABACAGA", "AAAAAAABACABA", "AAAAAAABACAAA"}
-			, duplications.toArray());
+		assertEquals(65467, msmbycode.size());
+		assertEquals(6, duplications.size());
+		assertArrayEquals(new Object[]{"ABABACCABA", "AAAAAAABACAEA", "AAAAAAABACAHA", "AAAAAAABACAGA", "AAAAAAABACABA", "AAAAAAABACAAA"}, 
+				duplications.toArray());
 		
-		//UtilMsm.reindexDuplications("ALIK2.tmp");
-		for(String code: duplications){
-			List<String[]> children = UtilMsm.selectChildren(code);
-			System.out.println("\nДубль мсм кода "+code+" у слов "+UtilMsm.selectAllWords(code)+" родитель ["+UtilMsm.getParents(code).stream().map(
-					r->((String[])r)[0]+": "+((String[])r)[1]+" родитель "+Arrays.toString(UtilMsm.getParent(((String[])r)[0])))
-			.collect(Collectors.joining(", "))+"]");
-			System.out.println("--------------- потомки ---------------");
-			children.stream().forEach((record)->{
-				System.out.printf("%s: %s\n", record[0], record[1]);
-			});
-		}
-		
-		System.out.println("\n");
-		  UtilMsm.getAllByCode("AAAAAAABACA").stream().forEach(r->{
-				 System.out.printf("%s: %s\n", ((String[])r)[0], ((String[])r)[1]);
-			 });
-			System.out.println("--------------- потомки ---------------");
-		 UtilMsm.selectChildren("AAAAAAABACA").stream().forEach(r->{
-			 System.out.printf("%s: %s\n", ((String[])r)[0], ((String[])r)[1]);
-		 });
-	}
+//		printDuplications(duplications);
+		assertEquals("ABABACCABAAAAAAAABACAEAAAAAAAABACAHAAAAAAAABACAGAAAAAAAABACABAAAAAAAABACAAA", 
+				duplications.stream().collect(Collectors.joining()));
 
+//		print("AAAAAAABACA");
+	}
 
 	@Test
-	public void testSelectAllWords() {
-		List<String> all = UtilMsm.selectAllWords("AAAAAAABACAEA");
-		assertNotNull(all);
-		assertEquals(2, all.size());
-		assertArrayEquals(new Object[]{"ЗЕЛЕНЫЙ", "ЗЕЛЕНОГО"}, all.toArray());
-	}
+	public void testReindex01() {
+		String vkusCode = "AAAAAABABAAAABE";
+		
+		String[] vkus = getElement(vkusCode);
+		assertEquals("AAAAAABABAAAABE", vkus[0]);
+		
+		List<String[]> vkusDescendants = getDescendants(vkusCode);
+		assertEquals(38, vkusDescendants.size());
+		
+//		print(vkus, "потомки", vkusDescendants);
+		assertEquals("ABCDEFGHIJAAABACADKKAKBKCKDKEKFKGKHKIAEAFAGAHAIAJAKALAMAEAAEAAAEABAEACAEAD", 
+				vkusDescendants.stream().map(a->removeParent(a[0], vkusCode)).collect(Collectors.joining()));
+		
+		List<String[]> vkusNeighbors = getNeighbors(vkusCode);
+		assertEquals(12, vkusNeighbors.size());
 
+//		print(vkus, "соседи", vkusNeighbors);
+		assertEquals("ABCDEFGHIJKL", 
+				vkusNeighbors.stream().map(a->removeParent(a[0], getParentCode(vkusCode))).collect(Collectors.joining()));
+		
+		String vkusovogoCode = "AAAAAABABAAAABF";
+		
+		String[] vkusovogo = getElement(vkusovogoCode);
+		assertEquals("AAAAAABABAAAABF", vkusovogo[0]);
+		
+		List<String[]> vkusovogoDescendants = getDescendants(vkusovogoCode);
+		assertEquals(0, vkusovogoDescendants.size());
+		
+		List<String[]> vkusovogoNeighbors = getNeighbors(vkusovogoCode);
+		assertEquals(12, vkusovogoNeighbors.size());
+		
+//		print(vkusovogoParent, "соседи", vkusovogoNeighbors);
+		assertEquals("ABCDEFGHIJKL", 
+				vkusovogoNeighbors.stream().map(a->removeParent(a[0], getParentCode(vkusovogoCode))).collect(Collectors.joining()));
+		
+		vkusovogoDescendants = reindex(vkusovogoCode, vkusDescendants, vkusCode);
+		assertEquals(38, vkusovogoDescendants.size());
+
+//		print(vkusovogoParent, "потомки", vkusovogoDescendants);
+		assertEquals("AAAAAAAAAAAAABACADAAAABACADAEAFAGAHAIAEAFAGAHAIAJAKALAMAEAAEAAAEABAEACAEAD", 
+				vkusovogoDescendants.stream().map(a->removeParent(a[0], vkusovogoCode)).collect(Collectors.joining()));
+		
+		assertEquals(vkusDescendants.stream().map(a->atoString(a)).collect(Collectors.joining()),
+				vkusovogoDescendants.stream().map(a->atoString(a)).collect(Collectors.joining()));
+	}
 }

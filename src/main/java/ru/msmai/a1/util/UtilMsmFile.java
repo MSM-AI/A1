@@ -1,5 +1,6 @@
 package ru.msmai.a1.util;
 
+import static ru.msmai.a1.util.UtilMsmCode.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,9 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-public class UtilMsm {
-	private static final String WORD_2_MSMCODE = "ALIK.txt";
+public class UtilMsmFile {
+	
 	private static final String MSMCODE_2_WORD = "ALIK2.txt";
 
 	public static Iterator<String> iterate() {
@@ -20,12 +22,12 @@ public class UtilMsm {
 		return new UtilFile(MSMCODE_2_WORD, consumer);
 	}
 
-	public static List<String[]> selectDescendants(String parentCode) {
+	public static List<String[]> getDescendants(String code) {
 		List<String[]> result = new ArrayList<>();
-		if (parentCode != null && !parentCode.isEmpty()) {
-			for (Iterator<String> iter = UtilMsm.iterate(); iter.hasNext();) {
+		if (code != null && !code.isEmpty()) {
+			for (Iterator<String> iter = UtilMsmFile.iterate(); iter.hasNext();) {
 				String[] record = UtilStr.justSplit(iter.next());
-				if (record[0].startsWith(parentCode)) {
+				if (record[0].startsWith(code) && !record[0].equals(code)) {
 					result.add(record);
 				}
 			}
@@ -33,13 +35,13 @@ public class UtilMsm {
 		return result;
 	}
 
-	public static List<String[]> selectChildren(String parentCode) {
+	public static List<String[]> getChildren(String code) {
 		List<String[]> result = new ArrayList<>();
-		if (parentCode != null && !parentCode.isEmpty()) {
-			int expectedCodeLength = parentCode.length() + 1;
-			for (Iterator<String> iter = UtilMsm.iterate(); iter.hasNext();) {
+		if (code != null && !code.isEmpty()) {
+			int expectedCodeLength = code.length() + 1;
+			for (Iterator<String> iter = UtilMsmFile.iterate(); iter.hasNext();) {
 				String[] record = UtilStr.justSplit(iter.next());
-				if (record[0].length() == expectedCodeLength && record[0].startsWith(parentCode)) {
+				if (record[0].length() == expectedCodeLength && record[0].startsWith(code)) {
 					result.add(record);
 				}
 			}
@@ -47,14 +49,13 @@ public class UtilMsm {
 		return result;
 	}
 
-	public static List<String[]> getAllByCode(String code) {
+	public static List<String[]> getElements(String code) {
 		AtomicReference<List<String[]>> result = new AtomicReference<>(new ArrayList<>());
 		if (code != null && !code.isEmpty()) {
-			UtilMsm.iterate((String line) -> {
+			UtilMsmFile.iterate((String line) -> {
 				String[] record = UtilStr.justSplit(line);
 				if (code.equals(record[0])) {
 					result.get().add(record);
-					return true;
 				}
 				return true;
 			});
@@ -62,16 +63,17 @@ public class UtilMsm {
 		return result.get();
 	}
 
-	public static String[] getFirstByCode(String code) {
+	public static String[] getElement(String code) {
 		AtomicReference<String[]> result = new AtomicReference<>();
 		if (code != null && !code.isEmpty()) {
-			UtilMsm.iterate((String line) -> {
+			UtilMsmFile.iterate((String line) -> {
 				String[] record = UtilStr.justSplit(line);
 				if (code.equals(record[0])) {
 					result.set(record);
 					return false;
+				} else {
+					return true;
 				}
-				return true;
 			});
 		}
 		return result.get();
@@ -79,24 +81,41 @@ public class UtilMsm {
 
 	public static String[] getRoot() {
 		AtomicReference<String[]> result = new AtomicReference<>();
-		UtilMsm.iterate((String line) -> {
-			result.set(UtilStr.justSplit(line));
-			return false;
+		UtilMsmFile.iterate((String line) -> {
+			String[] record = UtilStr.justSplit(line);
+			if ( isRoot(record[0]) ) {
+				result.set(record);
+				return false;
+			} else {
+				return true;
+			}
 		});
 		return result.get();
 	}
 
 	public static String[] getParent(String code) {
-		return getFirstByCode(UtilStr.getParentMsmCode(code));
+		return getElement(getParentCode(code));
 	}
 
 	public static List<String[]> getParents(String code) {
-		return getAllByCode(UtilStr.getParentMsmCode(code));
+		return getElements(getParentCode(code));
 	}
 
+	public static List<String[]> getNeighbors(String code) {
+		return getChildren(getParent(code)[0]);
+	}
+	
+	public static String getUsedCodes(String code) {
+		return getChildren(code).stream().map(a->removeParent(a[0], code)).sorted().collect(Collectors.joining());
+	}
+	
+	public static String getNextAvailable(String code) {
+		return getAvailableCodes(getUsedCodes(code)).substring(0,1);
+	}
+	
 	public static Map<String, String> selectAll(List<String> duplications) {
 		Map<String, String> result = new HashMap<>(100000);
-		for (Iterator<String> iter = UtilMsm.iterate(); iter.hasNext();) {
+		for (Iterator<String> iter = UtilMsmFile.iterate(); iter.hasNext();) {
 			String[] record = UtilStr.justSplit(iter.next());
 			if (result.containsKey(record[0])) {
 				duplications.add(record[0]);
@@ -107,9 +126,9 @@ public class UtilMsm {
 		return result;
 	}
 
-	public static List<String> selectAllWords(String code) {
+	public static List<String> selectWords(String code) {
 		List<String> result = new ArrayList<>();
-		for (Iterator<String> iter = UtilMsm.iterate(); iter.hasNext();) {
+		for (Iterator<String> iter = UtilMsmFile.iterate(); iter.hasNext();) {
 			String[] record = UtilStr.justSplit(iter.next());
 			if ( code.equals(record[0])) {
 				result.add(record[1]);
@@ -118,18 +137,14 @@ public class UtilMsm {
 		return result;
 	}
 
-	public static void reindexDuplications(String fileName) {
-		UtilFile.writeByLine(fileName, ()->"");
-		
-		Map<String, String> result = new HashMap<>(100000);
-		for (Iterator<String> iter = UtilMsm.iterate(); iter.hasNext();) {
-			String[] record = UtilStr.justSplit(iter.next());
-			if (result.containsKey(record[0])) {
-				record[1] += " - "+ result.get(record[0]);
-			} else {
-				result.put(record[0], record[1]);
-			}
+	public static List<String[]> reindex(String newParentCode, List<String[]> descendants, String oldParentCode) {
+		String nextAvailableCode = getNextAvailable(newParentCode);
+		for(String[] descendant: descendants){
+			String oldChildCode = removeParent(descendant[0], oldParentCode);
+			String newChildCode = replaceRoot(oldChildCode, nextAvailableCode);
+			descendant[0] = newParentCode + newChildCode;
 		}
-		result.clear();
+		return descendants;
 	}
+	
 }
