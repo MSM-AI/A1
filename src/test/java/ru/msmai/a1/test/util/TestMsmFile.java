@@ -74,8 +74,8 @@ public class TestMsmFile {
 	public void testSelectWords01() {
 		List<String> words = selectWords("AAAAAAABACAEA");
 		assertNotNull(words);
-		assertEquals(2, words.size());
-		assertArrayEquals(new Object[]{"ЗЕЛЕНЫЙ", "ЗЕЛЕНОГО"}, words.toArray());
+		assertEquals(1, words.size());
+		assertArrayEquals(new Object[]{"СИНЕТЬ"}, words.toArray());
 	}
 
 	@Test
@@ -108,13 +108,13 @@ public class TestMsmFile {
 		List<String> duplications = new ArrayList<String>();
 		Map<String,String> msmbycode = selectAll(duplications);
 		assertNotNull(msmbycode);
-		assertEquals(65467, msmbycode.size());
-		assertEquals(6, duplications.size());
-		assertArrayEquals(new Object[]{"ABABACCABA", "AAAAAAABACAEA", "AAAAAAABACAHA", "AAAAAAABACAGA", "AAAAAAABACABA", "AAAAAAABACAAA"}, 
+		assertEquals(68802, msmbycode.size());
+		assertEquals(2, duplications.size());
+		assertArrayEquals(new Object[]{"ABABACCABA", "AABBAFBC"}, 
 				duplications.toArray());
 		
 //		printDuplications(duplications);
-		assertEquals("ABABACCABAAAAAAAABACAEAAAAAAAABACAHAAAAAAAABACAGAAAAAAAABACABAAAAAAAABACAAA", 
+		assertEquals("ABABACCABAAABBAFBC", 
 				duplications.stream().collect(Collectors.joining()));
 
 //		print("AAAAAAABACA");

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class UtilMsmFile {
 	
-	private static final String MSMCODE_2_WORD = "ALIK2.txt";
+	private static final String MSMCODE_2_WORD = "ALIK2-2.txt";
 
 	public static Iterator<String> iterate() {
 		return new UtilFile(MSMCODE_2_WORD);
