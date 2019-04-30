@@ -7,6 +7,8 @@ import static ru.msmai.a1.util.UtilMsmCode.removeParent;
 import static ru.msmai.a1.util.UtilMsmCode.replaceRoot;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -165,6 +167,7 @@ public class MsmFile {
 
 	public void copyPasteDescendants(String newParentCode, String oldParentCode, String file) {
 
+		// copy & reindex
 		List<String[]> descendants = getDescendants(oldParentCode);
 		reindex(newParentCode, oldParentCode, descendants);
 		
@@ -175,10 +178,9 @@ public class MsmFile {
 		Iterator<String> iter = iterate();
 		
 		UtilFile.writeByLine(file, ()->{
-			Iterator<String[]> aiter = arefiter.get();
-			if( aiter != null ){ // paste
-				if( aiter.hasNext() ){
-					String[] next = aiter.next();
+			if( arefiter.get() != null ){ // paste
+				if( arefiter.get().hasNext() ){
+					String[] next = arefiter.get().next();
 					return next[0]+UtilMsmCode.SPACE+next[1];
 				} else {
 					arefiter.set(null);
@@ -199,16 +201,15 @@ public class MsmFile {
 				} else if ( newParentCode.equals(record[0])) {
 					areflag.set(true);
 				}
-
 				return line;
 			}
 			return null;
 		});
 	}
 	
-
 	public void cutPasteDescendants(String newParentCode, String oldParentCode, String file) {
 
+		// copy & reindex
 		List<String[]> descendants = getDescendants(oldParentCode);
 		reindex(newParentCode, oldParentCode, descendants);
 		
@@ -219,10 +220,9 @@ public class MsmFile {
 		Iterator<String> iter = iterate();
 		
 		UtilFile.writeByLine(file, ()->{
-			Iterator<String[]> aiter = arefiter.get();
-			if( aiter != null ){ // paste
-				if( aiter.hasNext() ){
-					String[] next = aiter.next();
+			if( arefiter.get() != null ){ // paste
+				if( arefiter.get().hasNext() ){
+					String[] next = arefiter.get().next();
 					return next[0]+UtilMsmCode.SPACE+next[1];
 				} else {
 					arefiter.set(null);
@@ -230,7 +230,7 @@ public class MsmFile {
 					return aline.get();
 				}
 			}
-			if( iter.hasNext() ){
+			while( iter.hasNext() ){
 				String line = iter.next();
 				String[] record = UtilStr.justSplit(line);
 				if( areflag.get() ){
@@ -243,21 +243,34 @@ public class MsmFile {
 				} else if ( newParentCode.equals(record[0])) {
 					areflag.set(true);
 				} else { // cut
-					while( record[0].startsWith(oldParentCode) && !record[0].equals(oldParentCode) ){
-						if( iter.hasNext() ){
-							line = iter.next();
-							record = UtilStr.justSplit(line);
-						} else {
-							line = null;
-							break;
-						}
+					if( record[0].startsWith(oldParentCode) && !record[0].equals(oldParentCode) ){
+						continue;
 					}
 				}
-				
 				return line;
 			}
 			return null;
 		});
 	}
 	
+	public void sortByCode(String file) {
+
+		List<String> list = new ArrayList<>(100000);
+		for (Iterator<String> iter = iterate(); iter.hasNext();) {
+			list.add(iter.next());
+		}
+
+		Collections.sort(list);
+		
+		Iterator<String> iter = list.iterator();
+		
+		UtilFile.writeByLine(file, ()->{
+			if( iter.hasNext() ){
+				return iter.next();
+			} else {
+				return null;
+			}
+		});
+	}
+
 }

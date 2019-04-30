@@ -173,8 +173,12 @@ public class TestMsmFile {
 	
 	@Test
 	public void testCutPasteDescendants01() {
-		String vkusCode = "AAAAAABABAAAABE";
-		String vkusovogoCode = "AAAAAABABAAAABF";
-		msmFile.cutPasteDescendants(vkusovogoCode, vkusCode, "ALIK2-4.tmp");
+		msmFile.cutPasteDescendants("AAAAAABABAAAABF", "AAAAAABABAAAABE", "ALIK2-4.tmp");
+	}
+	
+	@Test
+	public void testSortByCode01() {
+		msmFile.sortByCode("ALIK2-5.tmp");
+		new MsmFile("ALIK2-5.tmp").cutPasteDescendants("AAAAAABABAAAABF", "AAAAAABABAAAABE", "ALIK2-6.tmp");
 	}
 }
