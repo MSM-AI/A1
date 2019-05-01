@@ -1,5 +1,8 @@
 package ru.msmai.a1.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UtilMsmCode {
 	
 	public static final int MIN_TRUE = 0;
@@ -58,4 +61,25 @@ public class UtilMsmCode {
 		return b.isEmpty() || a.isEmpty() ? MIN_TRUE: a.equals(b) ? MAX_TRUE: 
 			Math.floorDiv(MAX_TRUE, Math.max(a.length(), b.length())) * trueEnds(a, b);
 	}
+	
+	public static String toString(String[] record){
+		return record[0]+SPACE+record[1];
+	}
+	
+	public static String getCode(String[] record){
+		return record[0];
+	}
+	
+	public static String getWord(String[] record){
+		return record[1];
+	}
+	
+	public static List<String[]> asList(String[]...records){
+		List<String[]> result = new ArrayList<>();
+		for(String[] record: records){
+			result.add(record);
+		}
+		return result;
+	}
+	
 }

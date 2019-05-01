@@ -16,7 +16,7 @@ public class UtilPrint {
 						+ " у слов "
 						+ msmFile.selectWords(code)
 						+ " родитель ["+parents.stream().map(a->atoString(a)
-						+ " родитель "+Arrays.toString(msmFile.getParent(a[0]))).collect(Collectors.joining(", "))+
+						+ " родитель "+Arrays.toString(msmFile.getParentByCode(a[0]))).collect(Collectors.joining(", "))+
 						"]");
 			UtilPrint.print(code, "потомки", msmFile.getChildren(code));
 		}

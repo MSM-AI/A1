@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -83,4 +86,52 @@ public class UtilFile implements Iterator<String>{
 		return queue.poll();
 	}
 
+	public static List<String> readAll(String fileName) {
+		List<String> list = new ArrayList<>(100000);
+		readByLine(fileName, (line)->{
+			list.add(line);
+			return true;
+		});
+		return list;
+	}
+
+	public static void writeAll(String fileName,  List<String> list) {
+		Iterator<String> iter = list.iterator();
+		writeByLine(fileName, ()->{
+			return iter.hasNext()? iter.next(): null;
+		});
+	}
+
+
+	public static int size(String fileName) {
+		AtomicInteger counter = new AtomicInteger(0);
+		readByLine(fileName, (line)->{
+			counter.incrementAndGet();
+			return true;
+		});
+		return counter.get();
+	}
+
+	public static boolean isEqual(String file1, String file2) {
+		BufferedReader reader1=null, reader2=null;
+		try{
+			reader1 = Files.newBufferedReader(Paths.get(file1));
+			reader2 = Files.newBufferedReader(Paths.get(file2));
+			for(String line1=reader1.readLine(),line2=reader2.readLine(); line1!=null&&line2!=null; line1=reader1.readLine(),line2=reader2.readLine()){
+				if( !line1.equals(line2)){
+					return false;
+				}
+			}
+		} catch(Exception e){
+			throw new RuntimeException("Can't read: "+file1+" or "+file2);
+		} finally {
+			try {
+				reader1.close();
+				reader2.close();
+			} catch (IOException e) {
+				throw new RuntimeException("Can't close: "+file1+" or "+file2);
+			}
+		}
+		return true;
+	}
 }
